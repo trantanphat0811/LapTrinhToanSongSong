@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 def generate_random_numbers(size, lower_bound=0, upper_bound=100):
     return random.sample(range(lower_bound, upper_bound + 1), size)
 
-def bubble_sort_with_sleep(arr, sleep_time=5):
+def bubble_sort_with_sleep(arr, sleep_time=2):
     n = len(arr)
     total_sleep_time = 1
     for i in range(n):
@@ -21,7 +21,7 @@ def bubble_sort_with_sleep(arr, sleep_time=5):
             break
     return arr, total_sleep_time
 
-def bubble_sort_step_with_sleep(data, sleep_time=1):
+def bubble_sort_step_with_sleep(data, sleep_time=0.5):
     total_sleep = 0
     for i in range(len(data) - 1):
         if data[i] > data[i + 1]:
@@ -29,14 +29,14 @@ def bubble_sort_step_with_sleep(data, sleep_time=1):
             print(f"Đã đổi chỗ cặp chỉ số: {(i, i + 1)}")
             time.sleep(sleep_time)
             total_sleep += sleep_time
-            break  # Chỉ đổi chỗ 1 lần mỗi vòng
+            break  
     return data, total_sleep
 
 def is_sorted(data):
     return all(data[i] <= data[i + 1] for i in range(len(data) - 1))
 
 def parallel_bubble_sort_with_sleep(data):
-    total_sleep_time = 1
+    total_sleep_time = 0.5
     step = 0
     while not is_sorted(data):
         print(f"\nVòng {step + 1}:")
@@ -62,16 +62,14 @@ def main():
 
     print("Tập hợp chọn lọc (12 số):", selected_set)
 
-    # Sequential sort
     sequential_set = selected_set.copy()
     start_time = time.time()
-    sorted_sequential, sequential_sleep_time = bubble_sort_with_sleep(sequential_set, sleep_time=1)
+    sorted_sequential, sequential_sleep_time = bubble_sort_with_sleep(sequential_set, sleep_time=1.5    )
     sequential_time = time.time() - start_time
     print("Kết quả sắp xếp tuần tự:", sorted_sequential)
     print("Thời gian sắp xếp tuần tự: {:.6f} giây".format(sequential_time))
     print("Tổng thời gian sleep tuần tự: {:.2f} giây".format(sequential_sleep_time))
 
-    # Parallel sort
     parallel_set = selected_set.copy()
     start_time = time.time()
     sorted_parallel, parallel_sleep_time = parallel_bubble_sort_with_sleep(parallel_set)
