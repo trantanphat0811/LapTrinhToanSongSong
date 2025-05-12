@@ -3,12 +3,12 @@ from collections import defaultdict
 
 class Graph:
     def __init__(self, dothi):
-        self.dothi = dothi
+        self.dothi = [row[:] for row in dothi]  # Tạo bản sao để tránh thay đổi ma trận gốc
         self.ROW = len(dothi)
 
     def tang_luong(self, a, z, P):
-        # Bàn đầu tất cả các đỉnh là chưa xét
-        visited = [False] * (self.ROW)
+        # Ban đầu tất cả các đỉnh là chưa xét
+        visited = [False] * self.ROW
 
         # BFS - tìm kiếm theo chiều rộng
         queue = []
@@ -16,23 +16,22 @@ class Graph:
         queue.append(a)
         visited[a] = True
 
-        # Giảm lượng đường dẫn còn lại
+        # Tìm đường tăng lưu lượng
         while queue:
-            # Lấy một phần tử ra khỏi hàng đợi
             u = queue.pop(0)
-
-            # Xét các đỉnh liền kề với u - là các đỉnh thuộc tập hợp các hàng đợi
+            # Xét các đỉnh liền kề với u
             for ind, val in enumerate(self.dothi[u]):
-                if (visited[ind] == False and val > 0):
+                if not visited[ind] and val > 0:
+                    queue.append(ind)
                     visited[ind] = True
                     P[ind] = u
-                    if (ind == z):
+                    if ind == z:
                         return True
         return False
 
     def luong_cuc_dai(self, a, z):
         # Lưu trữ đường đi nghịch
-        P = [-1] * (self.ROW)
+        P = [-1] * self.ROW
         f = 0  # Lưu lượng ban đầu bằng 0
 
         # Tăng lưu lượng khi có con đường từ a đến z
@@ -40,14 +39,28 @@ class Graph:
             # Tìm lưu lượng con đường hiện tại
             flow = float("Inf")
             s = z
-            while (s != a):
+            while s != a:
                 flow = min(flow, self.dothi[P[s]][s])
                 s = P[s]
 
-            # Thêm lưu lượng vào lưu lượng tổng
+            # Cập nhật lưu lượng trên các cạnh
+            v = z
+            while v != a:
+                u = P[v]
+                self.dothi[u][v] -= flow
+                self.dothi[v][u] += flow  # Cập nhật lưu lượng ngược
+                v = P[v]
+
             f += flow
 
         return f
+
+# Hàm bọc để chạy trong tiến trình
+def run_graph(dothi, a, z):
+    g = Graph(dothi)
+    max_flow = g.luong_cuc_dai(a, z)
+    print("Luong cuc dai la %d" % max_flow)
+    return max_flow
 
 # Ví dụ minh họa
 dothi = [[0, 3, 5, 0, 0, 0],
@@ -57,12 +70,14 @@ dothi = [[0, 3, 5, 0, 0, 0],
          [0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0]]
 
-g = Graph(dothi)
+# Chạy trực tiếp
 a = 0
 z = 5
+g = Graph(dothi)
 print("Luong cuc dai la %d" % g.luong_cuc_dai(a, z))
 
+# Chạy trong tiến trình
 if __name__ == '__main__':
-    p = Process(target=Graph, args=(g,))
+    p = Process(target=run_graph, args=(dothi, a, z))
     p.start()
     p.join()
